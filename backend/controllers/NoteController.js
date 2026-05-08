@@ -1,14 +1,16 @@
 const Note = require("../models/Note"); // importing note Schema
 
-// Handling the GET /notes Request : sends the notes to frontend as json format
+// Handling the GET /notes Request : sends only logged-in user's notes
 const getNotes = async (req, res) => {
 
     try {
 
-        const notes = await Note.find();
+        const notes = await Note.find({
+            user: req.user.userId
+        });
 
-       res.json({
-            message:"Notes Fetched Successfully",
+        res.json({
+            message: "Notes Fetched Successfully",
             data: notes
         });
 
@@ -20,20 +22,21 @@ const getNotes = async (req, res) => {
     }
 };
 
-// Handling the POST /notes request : create notes on server / add notes in DB
+// Handling the POST /notes request : create notes for logged-in user
 
 const createNote = async (req, res) => {
 
     try {
 
         const note = new Note({
-            title: req.body.title
+            title: req.body.title,
+            user: req.user.userId
         });
 
         const savedNote = await note.save();
 
         res.json({
-            message:"Note Added Successfully",
+            message: "Note Added Successfully",
             data: savedNote
         });
 
@@ -45,13 +48,17 @@ const createNote = async (req, res) => {
     }
 };
 
-// Handling the Put /notes request : updates notes on server / updates notes in DB
+// Handling the PUT /notes request : update only logged-in user's note
+
 const updateNote = async (req, res) => {
 
     try {
 
-        const updatedNote = await Note.findByIdAndUpdate(
-            req.params.id,
+        const updatedNote = await Note.findOneAndUpdate(
+            {
+                _id: req.params.id,
+                user: req.user.userId
+            },
             {
                 title: req.body.title
             },
@@ -61,7 +68,7 @@ const updateNote = async (req, res) => {
         );
 
         res.json({
-            message:"Note updated Successfully",
+            message: "Note updated Successfully",
             data: updatedNote
         });
 
@@ -73,12 +80,16 @@ const updateNote = async (req, res) => {
     }
 };
 
-//// Handling the DELETE /notes request : deletes notes in DB
+// Handling the DELETE /notes request : delete only logged-in user's note
+
 const deleteNote = async (req, res) => {
 
     try {
 
-        await Note.findByIdAndDelete(req.params.id);
+        await Note.findOneAndDelete({
+            _id: req.params.id,
+            user: req.user.userId
+        });
 
         res.json({
             message: "Note deleted successfully"
