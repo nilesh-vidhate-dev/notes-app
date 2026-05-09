@@ -8,7 +8,11 @@ const authRoutes = require("./routes/AuthRoutes");
 
 require("dotenv").config(); // imoport dotenv to read the .env file variables
 
+const cors = require("cors");
+
 const app = express(); // creating the express server
+
+app.use(cors());
 
 app.use(express.json()); // Express cannot read JSON body sent by client. so we have to use the middlewae to convert JSON data into javascript code
 
